@@ -1,0 +1,43 @@
+{
+  "name": "nijer-bazaar-server",
+  "version": "1.0.0",
+  "description": "Nijer Bazaar Backend API",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "npx nodemon --exec \"npx tsx src/index.ts\" --ext ts",
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:push": "npx drizzle-kit push",
+    "db:studio": "npx drizzle-kit studio",
+    "db:seed": "npx tsx src/config/seed.ts"
+  },
+  "keywords": [],
+  "author": "Nijer Bazaar",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "nodemon": "^1.14.10",
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
+    "pg": "^8.23.1"
+  }
+}
