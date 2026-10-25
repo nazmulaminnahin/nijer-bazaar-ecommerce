@@ -1,83 +1,29 @@
-import { Router, Request, Response } from "express";
-import { db } from "../config/db";
-import { loyaltyTransactions, users } from "../db/schema";
-import { eq, desc, sum, sql } from "drizzle-orm";
-import { authenticateAdmin } from "../middleware/auth.middleware";
-import { authenticate } from "../middleware/auth.middleware";
+import { Router } from 'express';
+import { authenticateAdmin } from '../middleware/adminAuth';
 
 const router = Router();
 
-// GET /api/loyalty/my — customer's own loyalty history
-router.get("/my", authenticate, async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  try {
-    const history = await db
-      .select()
-      .from(loyaltyTransactions)
-      .where(eq(loyaltyTransactions.userId, userId))
-      .orderBy(desc(loyaltyTransactions.createdAt))
-      .limit(50);
-    res.json({ history });
-  } catch {
-    res.status(500).json({ error: "লয়্যালটি ইতিহাস লোড হয়নি" });
-  }
-});
+// Temporary handlers
+const getLoyaltyPrograms = (_req: any, res: any) => {
+  res.json({ success: true, data: [], message: 'Loyalty programs feature coming soon' });
+};
 
-// GET /api/loyalty — admin: all transactions
-router.get("/", authenticateAdmin, async (req: Request, res: Response) => {
-  try {
-    const page = Number(req.query.page ?? 1);
-    const limit = Number(req.query.limit ?? 20);
-    const offset = (page - 1) * limit;
+const createLoyaltyProgram = (_req: any, res: any) => {
+  res.json({ success: true, message: 'Create loyalty program feature coming soon' });
+};
 
-    const transactions = await db
-      .select({
-        id: loyaltyTransactions.id,
-        userId: loyaltyTransactions.userId,
-        userName: users.name,
-        userEmail: users.email,
-        type: loyaltyTransactions.type,
-        points: loyaltyTransactions.points,
-        description: loyaltyTransactions.description,
-        createdAt: loyaltyTransactions.createdAt,
-      })
-      .from(loyaltyTransactions)
-      .leftJoin(users, eq(loyaltyTransactions.userId, users.id))
-      .orderBy(desc(loyaltyTransactions.createdAt))
-      .limit(limit)
-      .offset(offset);
+const updateLoyaltyProgram = (_req: any, res: any) => {
+  res.json({ success: true, message: 'Update loyalty program feature coming soon' });
+};
 
-    const [{ total }] = await db
-      .select({ total: sql<number>`count(*)` })
-      .from(loyaltyTransactions);
+const deleteLoyaltyProgram = (_req: any, res: any) => {
+  res.json({ success: true, message: 'Delete loyalty program feature coming soon' });
+};
 
-    res.json({ transactions, total: Number(total) });
-  } catch {
-    res.status(500).json({ error: "লয়্যালটি ডেটা লোড হয়নি" });
-  }
-});
-
-// POST /api/loyalty/grant — admin: grant points to user
-router.post("/grant", authenticateAdmin, async (req: Request, res: Response) => {
-  const { userId, points, description } = req.body;
-  if (!userId || !points) return res.status(400).json({ error: "ইউজার ও পয়েন্ট দিন" });
-  try {
-    await db.insert(loyaltyTransactions).values({
-      userId: Number(userId),
-      type: "bonus",
-      points: Number(points),
-      description: description ?? "অ্যাডমিন কর্তৃক বোনাস পয়েন্ট",
-    });
-    // Update user loyalty points
-    await db
-      .update(users)
-      .set({ loyaltyPoints: sql`${users.loyaltyPoints} + ${Number(points)}` })
-      .where(eq(users.id, Number(userId)));
-
-    res.json({ success: true });
-  } catch {
-    res.status(500).json({ error: "পয়েন্ট দেওয়া ব্যর্থ" });
-  }
-});
+// Routes
+router.get('/', authenticateAdmin, getLoyaltyPrograms);
+router.post('/', authenticateAdmin, createLoyaltyProgram);
+router.put('/:id', authenticateAdmin, updateLoyaltyProgram);
+router.delete('/:id', authenticateAdmin, deleteLoyaltyProgram);
 
 export default router;

@@ -1,5 +1,10 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toast";
+
+// Layouts
+import CustomerLayout from "@/components/layout/CustomerLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 
 // Customer Pages
 import HomePage from "@/pages/customer/HomePage";
@@ -33,11 +38,15 @@ import AdminStaff from "@/pages/admin/AdminStaff";
 import AdminAccounting from "@/pages/admin/AdminAccounting";
 import AdminSettings from "@/pages/admin/AdminSettings";
 
-// Layouts
-import AdminLayout from "@/layouts/AdminLayout";
+// Auth Stores
+import { useAdminAuthStore } from "@/store/adminAuthStore";
+import { useAuthStore } from "@/store/authStore";
 
-// Auth Guard
-import { useAdminAuthStore } from "@/stores/adminAuthStore";
+function CustomerGuard({ children }: { children: React.ReactNode }) {
+  const { user, token } = useAuthStore();
+  if (!user || !token) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { admin, token } = useAdminAuthStore();
@@ -49,18 +58,37 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Customer Routes ── */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/product/:slug" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/track-order" element={<OrderTrackingPage />} />
+        {/* ── Customer Storefront Routes (with Header & Footer) ── */}
+        <Route element={<CustomerLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/track" element={<OrderTrackingPage />} />
+          <Route path="/track-order" element={<OrderTrackingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route
+            path="/checkout"
+            element={
+              <CustomerGuard>
+                <CheckoutPage />
+              </CustomerGuard>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <CustomerGuard>
+                <ProfilePage />
+              </CustomerGuard>
+            }
+          />
+        </Route>
+
+        {/* ── Customer Auth Routes ── */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
 
         {/* ── Admin Routes ── */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -95,7 +123,7 @@ export default function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* 404 */}
+        {/* 404 Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 

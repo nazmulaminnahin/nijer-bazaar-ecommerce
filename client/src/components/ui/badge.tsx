@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-type BadgeVariant =
+export type BadgeVariant =
   | "default"
   | "secondary"
   | "destructive"
@@ -10,10 +10,12 @@ type BadgeVariant =
   | "warning"
   | "info"
   | "pending"
+  | "confirmed"
   | "processing"
   | "shipped"
   | "delivered"
   | "cancelled"
+  | "returned"
   | "refunded";
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -29,10 +31,12 @@ const variantClasses: Record<BadgeVariant, string> = {
   warning: "bg-yellow-100 text-yellow-700",
   info: "bg-blue-100 text-blue-700",
   pending: "bg-yellow-100 text-yellow-700",
-  processing: "bg-blue-100 text-blue-700",
+  confirmed: "bg-blue-100 text-blue-700",
+  processing: "bg-indigo-100 text-indigo-700",
   shipped: "bg-purple-100 text-purple-700",
   delivered: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
+  returned: "bg-orange-100 text-orange-700",
   refunded: "bg-orange-100 text-orange-700",
 };
 
@@ -41,7 +45,7 @@ export function Badge({ variant = "default", className, children, ...props }: Ba
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-        variantClasses[variant],
+        variantClasses[variant] ?? variantClasses.default,
         className
       )}
       {...props}
@@ -54,11 +58,13 @@ export function Badge({ variant = "default", className, children, ...props }: Ba
 export function getOrderStatusVariant(status: string): BadgeVariant {
   const map: Record<string, BadgeVariant> = {
     pending: "pending",
+    confirmed: "confirmed",
     processing: "processing",
     shipped: "shipped",
     delivered: "delivered",
     cancelled: "cancelled",
+    returned: "returned",
     refunded: "refunded",
   };
-  return map[status.toLowerCase()] ?? "default";
+  return map[status?.toLowerCase()] ?? "default";
 }

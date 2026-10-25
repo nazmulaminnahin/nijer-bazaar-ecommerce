@@ -22,5 +22,5 @@
       "@nijer-bazaar/shared/*": ["../shared/src/*"]
     }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src"]
 }

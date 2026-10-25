@@ -1,17 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface AdminUser {
+export interface Admin {
   id: number;
   name: string;
   email: string;
   role: string;
+  avatar?: string | null;
 }
 
 interface AdminAuthState {
-  admin: AdminUser | null;
+  admin: Admin | null;
   token: string | null;
-  setAdmin: (admin: AdminUser, token: string) => void;
+  isAuthenticated: boolean;
+  setAdmin: (admin: Admin, token: string) => void;
   logout: () => void;
 }
 
@@ -20,15 +22,23 @@ export const useAdminAuthStore = create<AdminAuthState>()(
     (set) => ({
       admin: null,
       token: null,
+      isAuthenticated: false,
       setAdmin: (admin, token) => {
         localStorage.setItem("nijer_bazaar_admin_token", token);
-        set({ admin, token });
+        set({ admin, token, isAuthenticated: Boolean(admin && token) });
       },
       logout: () => {
         localStorage.removeItem("nijer_bazaar_admin_token");
-        set({ admin: null, token: null });
+        set({ admin: null, token: null, isAuthenticated: false });
       },
     }),
-    { name: "nijer_bazaar_admin_auth" }
+    {
+      name: "admin-auth-storage",
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isAuthenticated = Boolean(state.admin && state.token);
+        }
+      },
+    }
   )
 );

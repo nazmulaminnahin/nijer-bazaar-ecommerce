@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, Store } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
@@ -32,13 +32,20 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       const res = await adminApi.post("/auth/admin/login", form);
-      const { token, admin } = res.data;
+      const payload = res.data?.data ?? res.data;
+      const token = payload?.token;
+      const admin = payload?.admin;
+      if (!token || !admin) {
+        throw new Error("Invalid login response");
+      }
       setAdmin(admin, token);
       toast.success("স্বাগতম! " + admin.name, "লগইন সফল");
       navigate("/admin/dashboard");
     } catch (err: any) {
       const msg =
-        err?.response?.data?.error ?? "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে";
+        err?.response?.data?.message ??
+        err?.response?.data?.error ??
+        "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে";
       toast.error(msg, "লগইন ব্যর্থ");
     } finally {
       setLoading(false);
@@ -47,7 +54,6 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-green-900 flex items-center justify-center p-4">
-      {/* Card */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-8 text-center">
@@ -100,33 +106,29 @@ export default function AdminLogin() {
               variant="brand"
               size="lg"
               loading={loading}
-              className="w-full"
+              className="w-full !bg-green-600 hover:!bg-green-700"
             >
               {loading ? "লগইন হচ্ছে..." : "লগইন করুন"}
             </Button>
           </form>
 
-          {/* Demo credentials */}
+          {/* Default seeded credentials */}
           <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-xs font-semibold text-green-700 mb-2">
-              🔑 ডেমো ক্রেডেনশিয়াল:
+              🔑 ডিফল্ট অ্যাডমিন ক্রেডেনশিয়াল (`npm run db:seed`):
             </p>
-            <p className="text-xs text-green-600">
+            <p className="text-xs text-green-700">
               Email: <strong>admin@nijerbazaar.com</strong>
             </p>
-            <p className="text-xs text-green-600">
-              Password: <strong>admin123</strong>
+            <p className="text-xs text-green-700">
+              Password: <strong>admin123456</strong>
             </p>
           </div>
 
-          {/* Back to site */}
           <p className="text-center text-sm text-gray-500 mt-6">
-            <a
-              href="/"
-              className="text-green-600 hover:underline font-medium"
-            >
+            <Link to="/" className="text-green-600 hover:underline font-medium">
               ← মূল ওয়েবসাইটে ফিরুন
-            </a>
+            </Link>
           </p>
         </div>
       </div>

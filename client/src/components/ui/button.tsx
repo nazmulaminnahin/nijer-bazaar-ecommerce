@@ -14,10 +14,11 @@ type ButtonVariant =
 
 type ButtonSize = "sm" | "default" | "lg" | "xl" | "icon";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
@@ -34,9 +35,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   ghost: "text-gray-700 hover:bg-gray-100 focus-visible:outline-gray-100",
   link: "text-blue-600 underline-offset-4 hover:underline focus-visible:outline-blue-600",
   brand:
-    "bg-green-600 text-white hover:bg-green-700 focus-visible:outline-green-600",
+    "bg-orange-500 text-white hover:bg-orange-600 focus-visible:outline-orange-500",
   "brand-outline":
-    "border border-green-600 text-green-600 hover:bg-green-50 focus-visible:outline-green-600",
+    "border border-orange-500 text-orange-600 hover:bg-orange-50 focus-visible:outline-orange-500",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -53,6 +54,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "default",
       size = "default",
       loading = false,
+      isLoading = false,
       leftIcon,
       rightIcon,
       className,
@@ -62,10 +64,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    const busy = loading || isLoading;
     return (
       <button
         ref={ref}
-        disabled={disabled || loading}
+        disabled={disabled || busy}
         className={cn(
           "inline-flex items-center justify-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           variantClasses[variant],
@@ -74,13 +77,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          leftIcon
-        )}
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : leftIcon}
         {children}
-        {!loading && rightIcon}
+        {!busy && rightIcon}
       </button>
     );
   }
